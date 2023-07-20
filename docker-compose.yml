@@ -1,0 +1,58 @@
+version: "3.7"
+
+services:
+  ########## Fast API ############
+  fastapi:
+    build: ./fastapi
+    environment:
+      REDISSERVER: redis://redis:6379
+      C_FORCE_ROOT: "true"
+    ports:
+      - "8000:80"
+    depends_on:
+      - redis
+
+  cpu_worker:
+    build: ./cpu-celery
+    environment:
+      REDISSERVER: redis://redis:6379
+      C_FORCE_ROOT: "true"
+    depends_on:
+      - redis
+
+  ########## GPU Celery Workers ##########
+  gpu_worker:
+    build: ./gpu-celery
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0']
+              capabilities: [gpu]
+    environment:
+      REDISSERVER: redis://redis:6379
+      C_FORCE_ROOT: "true"
+    depends_on:
+      - redis
+
+  ########### Redis Message Broker ####
+  redis:
+    image: redis
+
+
+  ########### Flower Monitor #########
+  flower:  
+    image: mher/flower
+    restart: always
+    command: celery flower --persistent=True --basic_auth=admin:password
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - FLOWER_PORT=8080
+    ports:  
+      - 8080:8080
+    depends_on:
+      - redis
+
+
+    
