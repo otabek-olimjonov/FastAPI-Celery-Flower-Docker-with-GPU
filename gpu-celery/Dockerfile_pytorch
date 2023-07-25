@@ -1,6 +1,6 @@
 FROM nvidia/cuda:11.1.1-cudnn8-devel-ubuntu20.04
 # use an older system (18.04) to avoid opencv incompatibility (issue#3524)
-LABEL maintainer="Otabek Olimjonov <otabek.o@chowis.com>"
+LABEL maintainer="Otabek Olimjonov <bekdevs01@gmail.com>"
 
 RUN rm /etc/apt/sources.list.d/cuda.list
 
